@@ -11,11 +11,23 @@ from src.visualization.flight_visualizer import render_trajectory_animation
 
 def main():
     parser = argparse.ArgumentParser(description="Live Demonstration of Formation Flight Pose Estimation.")
+    parser.add_argument("--gui", type=str, default="opencv", choices=["opencv", "matplotlib"],
+                        help="GUI display backend (default: opencv for instant high-fps cockpit HUD)")
     parser.add_argument("--save_gif", action="store_true", help="Save demonstration animation to GIF file")
+    parser.add_argument("--open_gif", action="store_true", help="Open the pre-rendered animated flight GIF in Windows Photos")
     parser.add_argument("--gif_path", type=str, default="docs/figures/live_demo.gif", help="Output GIF path")
     parser.add_argument("--fps", type=int, default=15, help="Animation frames per second")
     parser.add_argument("--num_particles", type=int, default=1000, help="Number of particles for PF")
     args = parser.parse_args()
+
+    if args.open_gif:
+        gif_file = os.path.abspath(args.gif_path)
+        if os.path.exists(gif_file):
+            print(f"Opening {gif_file} in default image viewer...")
+            os.startfile(gif_file)
+            return
+        else:
+            print(f"GIF file not found at {gif_file}. Run with --save_gif first.")
 
     model_path = "data/models/ann_pose_classifier.pt"
     if not os.path.exists(model_path):
@@ -30,16 +42,25 @@ def main():
     )
 
     if args.save_gif:
+        from src.visualization.flight_visualizer import render_trajectory_animation
         render_trajectory_animation(
             benchmark_data=benchmark_data,
             save_path=args.gif_path,
             fps=args.fps
         )
-    else:
-        print("\nOpening interactive live demonstration dashboard...")
+    elif args.gui == "matplotlib":
+        print("\nOpening Matplotlib 3-panel dashboard...")
+        from src.visualization.flight_visualizer import render_trajectory_animation
         render_trajectory_animation(
             benchmark_data=benchmark_data,
             save_path=None,
+            fps=args.fps
+        )
+    else:
+        print("\nOpening real-time Cockpit HUD Demonstration (OpenCV)...")
+        from src.visualization.flight_visualizer import run_opencv_demo
+        run_opencv_demo(
+            benchmark_data=benchmark_data,
             fps=args.fps
         )
 
