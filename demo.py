@@ -11,14 +11,28 @@ from src.visualization.flight_visualizer import render_trajectory_animation
 
 def main():
     parser = argparse.ArgumentParser(description="Live Demonstration of Formation Flight Pose Estimation.")
+    parser.add_argument("--web", action="store_true", help="Open high-tech interactive HUD dashboard directly in your Web Browser (Chrome/Edge)")
     parser.add_argument("--gui", type=str, default="opencv", choices=["opencv", "matplotlib"],
-                        help="GUI display backend (default: opencv for instant high-fps cockpit HUD)")
+                        help="GUI display backend (default: opencv for desktop window)")
     parser.add_argument("--save_gif", action="store_true", help="Save demonstration animation to GIF file")
     parser.add_argument("--open_gif", action="store_true", help="Open the pre-rendered animated flight GIF in Windows Photos")
     parser.add_argument("--gif_path", type=str, default="docs/figures/live_demo.gif", help="Output GIF path")
     parser.add_argument("--fps", type=int, default=15, help="Animation frames per second")
     parser.add_argument("--num_particles", type=int, default=1000, help="Number of particles for PF")
     args = parser.parse_args()
+
+    if args.web:
+        html_file = os.path.abspath("interactive_dashboard.html")
+        if not os.path.exists(html_file):
+            print("Generating interactive web dashboard...")
+            from src.evaluation.benchmark import run_benchmark
+            from src.visualization.dashboard_html import generate_interactive_html
+            b_data = run_benchmark()
+            generate_interactive_html(b_data, html_file)
+        print(f"Opening interactive dashboard in default browser: {html_file}")
+        import webbrowser
+        webbrowser.open(f"file:///{html_file}")
+        return
 
     if args.open_gif:
         gif_file = os.path.abspath(args.gif_path)

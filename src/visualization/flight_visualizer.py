@@ -208,6 +208,20 @@ def run_opencv_demo(benchmark_data: dict, fps: int = 15):
     window_name = "Vision-Based Precision Formation Flight (UE24CS352A)"
     cv2.namedWindow(window_name, cv2.WINDOW_NORMAL)
     cv2.resizeWindow(window_name, win_w, win_h)
+    try:
+        cv2.setWindowProperty(window_name, cv2.WND_PROP_TOPMOST, 1)
+    except Exception:
+        pass
+
+    # Force window to foreground on Windows
+    try:
+        import ctypes
+        hwnd = ctypes.windll.user32.FindWindowW(None, window_name)
+        if hwnd:
+            ctypes.windll.user32.ShowWindow(hwnd, 5)  # SW_SHOW
+            ctypes.windll.user32.SetForegroundWindow(hwnd)
+    except Exception:
+        pass
 
     print("\n" + "=" * 65)
     print("  LIVE COCKPIT HUD CONTROLS:")
