@@ -6,3 +6,5 @@ __pycache__/
 .vscode/
 .idea/
 data/*.npz
+generate_report_pdf.py
+generate_slides_pdf.py
